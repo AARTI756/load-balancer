@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Load Balancer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>⚡ Predictive Load Balancer</h1>
+
+    <!-- 🔥 INPUT FORM -->
+    <form method="POST" class="glass-card">
+
+        <div class="input-group">
+            <label>CPU Usage (%)</label>
+            <span class="hint">Range: 0 – 100</span>
+            <input type="number" name="cpu" min="0" max="100" placeholder="e.g. 75" required>
+        </div>
+
+        <div class="input-group">
+            <label>CPU Idle (%)</label>
+            <span class="hint">Range: 0 – 100</span>
+            <input type="number" name="idle" min="0" max="100" placeholder="e.g. 25" required>
+        </div>
+
+        <div class="input-group">
+            <label>Load (1 min)</label>
+            <span class="hint">Range: 0 – 10</span>
+            <input type="number" step="0.1" name="load" min="0" max="10" placeholder="e.g. 2.5" required>
+        </div>
+
+        <div class="input-group">
+            <label>Memory (%)</label>
+            <span class="hint">Range: 0 – 100</span>
+            <input type="number" name="mem" min="0" max="100" placeholder="e.g. 60" required>
+        </div>
+
+        <button type="submit">Predict</button>
+    </form>
+
+    <!-- ⏳ LOADER -->
+    <div id="loader" class="loader hidden">
+        <div class="spinner"></div>
+        <p>Analyzing system load...</p>
+    </div>
+
+    {% if result %}
+    <div class="result-card glass-card">
+
+        <!-- 🔮 PREDICTION -->
+        <h2 class="prediction {{ result.prediction }}">
+            {{ result.prediction }}
+        </h2>
+
+        <!-- 🔵 Circular Confidence -->
+        <div class="circle"
+            data-value="{% if result.prediction=='HIGH' %}{{ result.prob_high }}
+                        {% elif result.prediction=='MEDIUM' %}{{ result.prob_med }}
+                        {% else %}{{ result.prob_low }}
+                        {% endif %}">
+
+            <svg>
+                <circle cx="70" cy="70" r="60"></circle>
+                <circle cx="70" cy="70" r="60" class="progress-circle"></circle>
+            </svg>
+
+            <div class="number">
+                {% if result.prediction=='HIGH' %}
+                    {{ result.prob_high }}%
+                {% elif result.prediction=='MEDIUM' %}
+                    {{ result.prob_med }}%
+                {% else %}
+                    {{ result.prob_low }}%
+                {% endif %}
+            </div>
+
+            <p>Low: {{ result.prob_low }}</p>
+            <p>Med: {{ result.prob_med }}</p>
+            <p>High: {{ result.prob_high }}</p>
+
+        </div>        
+        <!-- 🟠 DECISION -->
+        <div class="decision-badge {{ result.decision.replace(' ', '_') }}">
+            {{ result.decision }}
+        </div>
+
+        <div class="charts-container">
+            <div class="glass-card">
+                <h3>📊 Prediction Confidence</h3>
+                <canvas id="probChart"></canvas>
+            </div>
+
+            <div class="glass-card">
+                <h3>📈 CPU Trend (Simulation)</h3>
+                <canvas id="cpuChart"></canvas>
+            </div>
+        </div>
+        <div id="chartData"
+            data-low="{{ result.prob_low }}"
+            data-med="{{ result.prob_med }}"
+            data-high="{{ result.prob_high }}">
+        </div>
+
+        <!-- 🧾 HISTORY -->
+        <div class="glass-card">
+            <h3>🧾 Recent Predictions</h3>
+            <table id="historyTable">
+                <thead>
+                    <tr>
+                        <th>CPU</th>
+                        <th>Load</th>
+                        <th>Prediction</th>
+                        <th>Decision</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- 🧠 INSIGHT -->
+        <div class="glass-card" id="insightBox"></div>
+
+    </div>
+    {% endif %}    
+        
+  
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
