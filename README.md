@@ -1,316 +1,334 @@
-# Predictive Server Load Balancer
-### Machine Learning + Fuzzy Logic (Soft Computing)
+# ⚡ Predictive Server Load Balancer
 
-**Dataset:** Cryptojacking Attack Timeseries Dataset (Kaggle)
+### Machine Learning + Fuzzy Logic (Soft Computing) + Real-Time Flask Dashboard
+
+**Mini Project – 3rd Year Computer Engineering**
 
 ---
 
-## Project Structure
-```
-server_load_balancer/
+## 📌 Project Overview
+
+Modern computing systems face **unpredictable server load spikes**, which can lead to performance degradation or system crashes.
+
+This project builds an **intelligent hybrid load balancing system** that combines:
+
+* 🤖 Machine Learning (Random Forest) → Predicts system load
+* 🧠 Fuzzy Logic (Soft Computing) → Makes intelligent scaling decisions
+* 🌐 Flask Web Dashboard → Real-time visualization
+* 📊 System Monitoring → Uses actual CPU & memory data
+
+The system ensures **proactive scaling decisions instead of reactive responses**.
+
+---
+
+## 🚀 Key Features
+
+### 🧠 ML + Soft Computing Core
+
+* ✔ Random Forest-based load prediction (LOW / MEDIUM / HIGH)
+* ✔ Logistic Regression (comparison model)
+* ✔ Fuzzy Logic decision system (NO SCALE / SCALE SLIGHTLY / SCALE HIGH)
+* ✔ Lag-based time-series feature engineering
+
+### ⚙️ Real-Time System
+
+* ✔ Live CPU usage tracking (psutil)
+* ✔ Memory usage monitoring
+* ✔ Load average calculation
+* ✔ Session-based history tracking
+
+### 🌐 Web Dashboard (NEW ADDITION)
+
+* ✔ Flask-based UI (app.py)
+* ✔ Auto-refresh live dashboard
+* ✔ Interactive charts (Chart.js)
+* ✔ CPU trend visualization
+* ✔ Prediction confidence visualization
+* ✔ Server scaling simulation
+* ✔ Smart alerts + peak detection
+
+---
+
+## 📁 Project Structure
+
+```text
+Predictive-Server-Load-Balancer/
+│
+├── app.py                         # Flask backend (LIVE UI system)
+├── fuzzy_system.py               # Fuzzy Logic engine (skfuzzy)
+│
+├── models/
+│   ├── random_forest.pkl         # Trained ML model
+│   ├── logistic_regression.pkl   # Comparison model
+│   ├── scaler.pkl                # MinMaxScaler
+│   └── x_cols.npy                # Feature columns
 │
 ├── data/
-│   ├── generate_data.py             ← Generates synthetic dataset if no real CSV
-│   └── final-complete-data-set.csv  ← Dataset (real or synthetic)
+│   ├── generate_data.py          # Synthetic dataset generator
+│   └── final-complete-data-set.csv
 │
-├── models/                          ← Auto-created after running
-│   ├── random_forest.pkl            ← Trained Random Forest model
-│   ├── logistic_regression.pkl      ← Trained Logistic Regression model
-│   ├── scaler.pkl                   ← Fitted MinMaxScaler
-│   └── x_cols.npy                   ← Feature column names
+├── templates/
+│   ├── index.html               # Main dashboard UI
+│   └── home.html                # Landing page
 │
-├── results/                         ← Auto-created after running
+├── static/
+│   ├── script.js                # Frontend logic + charts
+│   └── style.css                # Glassmorphism UI styling
+│
+├── results/                     # ML analysis outputs
 │   ├── confusion_matrices.png
 │   ├── cpu_trend.png
-│   ├── actual_vs_predicted.png
 │   ├── feature_importance.png
-│   ├── membership_functions.png
-│   ├── integration_cpu_decisions.png
 │   ├── fuzzy_output_trend.png
-│   ├── predicted_category_dist.png
 │   └── batch_results.csv
 │
-├── ml_model.py       ← PART 1 · Preprocessing + ML Training
-├── fuzzy_system.py   ← PART 2 · Fuzzy Logic System
-├── integration.py    ← PART 3 · ML + Fuzzy Combined Pipeline
-├── run_all.py        ← ▶ Run everything with one command
 └── README.md
 ```
 
 ---
-For ui
 
-use python app.py
+## ⚙️ System Architecture
 
-## Project Objective
-
-Modern servers face unpredictable load spikes. This project builds an intelligent load balancer that:
-
-1. **Predicts** upcoming server load using Machine Learning (Random Forest)
-2. **Decides** the scaling action using Fuzzy Logic (Soft Computing)
-3. **Integrates** both into a real-time decision pipeline
-
----
-
-## Dataset
-
-**Source:** https://www.kaggle.com/datasets/keshanijayasinghe/cryptojacking-attack-timeseries-dataset
-
-| Column         | Description                     |
-|----------------|---------------------------------|
-| timestamp      | Time of measurement             |
-| cpu_total      | Total CPU usage (%)             |
-| cpu_idle       | CPU idle time (%)               |
-| load_min1      | 1-minute load average           |
-| load_min5      | 5-minute load average           |
-| mem_used       | Memory used (bytes)             |
-| mem_percent    | Memory usage (%)                |
-| network_lo_rx  | Network received (bytes)        |
-| network_lo_tx  | Network transmitted (bytes)     |
-
----
-
-## Installation
-
-### Requirements
-- Python 3.9 or higher
-- pip
-
-### Install Dependencies
-```
-pip install pandas numpy matplotlib scikit-learn scikit-fuzzy scipy joblib
+```text
+             Real-Time CPU + Memory
+                       │
+                       ▼
+              Flask Backend (app.py)
+                       │
+        ┌──────────────┴──────────────┐
+        │                             │
+   Machine Learning            System Metrics
+   (Random Forest)             (psutil)
+        │                             │
+        └──────────────┬──────────────┘
+                       ▼
+              Fuzzy Logic System
+                       │
+           Intelligent Scaling Decision
+                       │
+                       ▼
+             Web Dashboard (UI)
 ```
 
 ---
 
-## How to Run
+## 🧠 Machine Learning Module
 
-### Option 1 — Run Everything (Recommended)
+### 🔹 Models Used
+
+* Random Forest Classifier (Primary)
+* Logistic Regression (Comparison)
+
+### 🔹 Input Features
+
+* cpu_total
+* cpu_idle
+* load_min1
+* mem_percent
+* network activity (dataset-based)
+* lag features (t-1, t-2, t-3)
+
+### 🔹 Output Classes
+
+```text
+0 → LOW
+1 → MEDIUM
+2 → HIGH
 ```
-python run_all.py
-```
 
-This runs all 3 parts in order and saves all plots and models automatically.
+### 🔹 Why Random Forest?
 
-### Option 2 — Run Each Part Separately
-```
-python ml_model.py      ← Train ML models + generate evaluation plots
-python fuzzy_system.py  ← Test fuzzy logic + plot membership functions
-python integration.py   ← Full pipeline: ML prediction → Fuzzy decision
-```
-
-### Using the Real Kaggle Dataset
-
-1. Download final-complete-data-set.csv from Kaggle
-2. Place it inside the data/ folder
-3. Run python run_all.py — no code changes needed
+* Handles nonlinear system behavior
+* Works well with noisy system data
+* Provides high accuracy
+* Supports feature importance analysis
 
 ---
 
-## System Flow
-```
-Raw Server Metrics (CSV)
-         │
-         ▼
-┌────────────────────────────────────┐
-│           PREPROCESSING            │
-│  ✦ Handle missing values           │
-│  ✦ Parse timestamps                │
-│  ✦ Lag features (t-1, t-2, t-3)   │
-│  ✦ MinMaxScaler normalization      │
-└────────────────┬───────────────────┘
-                 │
-                 ▼
-┌────────────────────────────────────┐
-│      ML MODEL (Random Forest)      │
-│  Input  → feature vector           │
-│  Output → LOW / MEDIUM / HIGH      │
-└────────────────┬───────────────────┘
-                 │
-       ┌─────────┴──────────┐
-  Predicted Load        Current CPU %
-       └─────────┬──────────┘
-                 │
-                 ▼
-┌────────────────────────────────────┐
-│       FUZZY LOGIC (skfuzzy)        │
-│  ✦ Fuzzify inputs                  │
-│  ✦ Apply 9 IF-THEN rules           │
-│  ✦ Defuzzify (centroid method)     │
-└────────────────┬───────────────────┘
-                 │
-                 ▼
-         SCALING DECISION
-  NO SCALE · SCALE SLIGHTLY · SCALE HIGH
-```
+## 🧠 Fuzzy Logic (Soft Computing)
 
----
+### 🔹 Inputs
 
-## Machine Learning — Part 1
+* Predicted Load (from ML)
+* Current CPU usage
 
-### Target Variable
-```
-cpu_total > 80%        →  HIGH    (label 2)
-cpu_total 50% to 80%   →  MEDIUM  (label 1)
-cpu_total < 50%        →  LOW     (label 0)
-```
+### 🔹 Output
 
-### Feature Engineering
+* NO SCALE
+* SCALE SLIGHTLY
+* SCALE HIGH
 
-Lag features are created for each metric at time steps t-1, t-2 and t-3
-to capture time-series trends.
-Total features after engineering: 35
+### 🔹 Membership Functions
 
-### Models Trained
+* LOW → trapezoidal
+* MEDIUM → triangular
+* HIGH → trapezoidal
 
-| Model                | Accuracy                          |
-|----------------------|-----------------------------------|
-| Random Forest        | 100% (synthetic) / ~95% (real)    |
-| Logistic Regression  | 96.1%                             |
+### 🔹 Rule Base (9 Rules)
 
-### Plots Generated
-```
-✦ Confusion matrix comparing RF vs Logistic Regression
-✦ CPU usage trend with HIGH and MEDIUM thresholds
-✦ Actual vs Predicted load category (first 200 test samples)
-✦ Top 15 feature importances from Random Forest
+| Rule | Predicted | CPU    | Action         |
+| ---- | --------- | ------ | -------------- |
+| R1   | HIGH      | HIGH   | SCALE HIGH     |
+| R2   | HIGH      | MEDIUM | SCALE HIGH     |
+| R3   | MEDIUM    | HIGH   | SCALE SLIGHTLY |
+| R4   | MEDIUM    | MEDIUM | SCALE SLIGHTLY |
+| R5   | MEDIUM    | LOW    | SCALE SLIGHTLY |
+| R6   | LOW       | LOW    | NO SCALE       |
+| R7   | LOW       | MEDIUM | NO SCALE       |
+| R8   | LOW       | HIGH   | SCALE SLIGHTLY |
+| R9   | HIGH      | LOW    | SCALE SLIGHTLY |
+
+### 🔹 Defuzzification
+
+* Method: Centroid (Center of Gravity)
+* Output mapping:
+
+```text
+0 – 3.5   → NO SCALE
+3.5 – 6.5 → SCALE SLIGHTLY
+6.5 – 10  → SCALE HIGH
 ```
 
 ---
 
-## Fuzzy Logic — Part 2 (Soft Computing)
+## 🌐 Web Dashboard (NEW FEATURE)
 
-### Inputs and Output
+### Run UI:
 
-| Variable       | Type   | Range      | Fuzzy Sets                          |
-|----------------|--------|------------|-------------------------------------|
-| Predicted Load | Input  | 0 to 100%  | LOW, MEDIUM, HIGH                   |
-| Current CPU    | Input  | 0 to 100%  | LOW, MEDIUM, HIGH                   |
-| Scaling Action | Output | 0 to 10    | NO_SCALE, SCALE_SLIGHTLY, SCALE_HIGH|
-
-### Membership Functions
-```
-Inputs  → Trapezoidal for LOW and HIGH · Triangular for MEDIUM
-Output  → Triangular for all three sets
-Method  → Defuzzification by Centroid (centre of gravity)
+```bash
+python app.py
 ```
 
-### Rules (9 Total)
+### Open:
 
-| Rule | Predicted Load | Current CPU | → Scaling Action |
-|------|---------------|-------------|------------------|
-| R1   | HIGH          | HIGH        | SCALE HIGH       |
-| R2   | HIGH          | MEDIUM      | SCALE HIGH       |
-| R3   | MEDIUM        | HIGH        | SCALE SLIGHTLY   |
-| R4   | MEDIUM        | MEDIUM      | SCALE SLIGHTLY   |
-| R5   | MEDIUM        | LOW         | SCALE SLIGHTLY   |
-| R6   | LOW           | LOW         | NO SCALE         |
-| R7   | LOW           | MEDIUM      | NO SCALE         |
-| R8   | LOW           | HIGH        | SCALE SLIGHTLY   |
-| R9   | HIGH          | LOW         | SCALE SLIGHTLY   |
-
-### Output Interpretation
 ```
-Crisp value 0.0 → 3.5   ·   NO SCALE
-Crisp value 3.5 → 6.5   ·   SCALE SLIGHTLY
-Crisp value 6.5 → 10.0  ·   SCALE HIGH
+http://127.0.0.1:5000/predict
+```
+
+### Dashboard Features:
+
+* 🔥 Live CPU & Memory monitoring
+* 🤖 ML prediction display
+* 🧠 Fuzzy scaling decision
+* 📊 Confidence bar chart
+* 📈 CPU trend graph
+* ⏳ Future load simulation
+* 🖥️ Server scaling simulation
+* 🚨 Smart alerts
+* 🔥 Peak load detection
+* 🧾 Prediction history table
+
+---
+
+## 🔮 Future Prediction System
+
+* Generates next **6-hour load simulation**
+* Uses:
+
+  * CPU trend drift
+  * Random noise injection
+  * Incremental load modeling
+
+👉 Used for:
+
+* Forecast visualization
+* Scaling simulation
+* Peak detection
+
+---
+
+## ⚙️ Installation
+
+```bash
+pip install flask numpy pandas psutil scikit-learn joblib scikit-fuzzy matplotlib
 ```
 
 ---
 
-## Sample Output
+## ▶ Run Project
+
+### 1. Start Flask Server
+
+```bash
+python app.py
 ```
-─────────────────────────────────────────────────────
-  Row 1200 · Actual CPU : 89.09%
-  ➤  ML Predicted Load  : HIGH
-     Probabilities       : LOW=0.00 · MED=0.03 · HIGH=0.97
-  ➤  Fuzzy Crisp Output : 9.000
-  ➤  SCALING DECISION   : SCALE HIGH
-─────────────────────────────────────────────────────
-  Row 500  · Actual CPU : 20.92%
-  ➤  ML Predicted Load  : LOW
-     Probabilities       : LOW=1.00 · MED=0.00 · HIGH=0.00
-  ➤  Fuzzy Crisp Output : 1.000
-  ➤  SCALING DECISION   : NO SCALE
-─────────────────────────────────────────────────────
+
+### 2. Open in Browser
+
+```
+http://127.0.0.1:5000/predict
 ```
 
 ---
 
-**Q: What problem does this project solve?**
-Servers face unpredictable load spikes. If load is not managed proactively
-servers crash or slow down. This system predicts future load using ML and
-decides scaling action using Fuzzy Logic before the spike actually hits.
+## 📊 Example Output
 
-**Q: Why Random Forest?**
-Random Forest builds multiple decision trees and combines their output.
-It handles non-linear relationships well, is robust to noise, works well
-with lag features and provides feature importance scores which are all
-useful properties for server metric data.
+```text
+CPU Usage: 57.3%
+Memory Usage: 84.8%
 
-**Q: Why Fuzzy Logic instead of simple if-else?**
-Simple if-else is brittle. A CPU at 79% would be treated identically to
-51% even though it is nearly HIGH. Fuzzy logic handles this ambiguity.
-79% is treated as partly HIGH and partly MEDIUM producing smooth
-graduated decisions instead of hard jumps.
+Prediction: MEDIUM
+Decision: SCALE SLIGHTLY
 
-**Q: What are lag features?**
-Values of a metric at previous time steps t-1, t-2 and t-3. For example
-cpu_total_lag1 is the CPU value one second ago. They give the model
-memory of past trends so it can detect whether load is rising or falling.
-
-**Q: What is defuzzification?**
-After fuzzy rules fire we get overlapping output fuzzy sets.
-Defuzzification converts them into one crisp number using the centroid
-method which finds the centre of gravity of the combined output area.
-That number is then mapped to a scaling decision label.
-
-**Q: Why is accuracy 100% on synthetic data?**
-Because the synthetic dataset was generated with clean mathematical
-boundaries that exactly match the thresholds used to define the labels.
-On the real Kaggle dataset with noise and overlap accuracy will be around
-93 to 96 percent which is realistic and excellent. The pipeline
-architecture works identically for both datasets.
-
----
-
-## Possible Improvements
-```
-1  ·  LSTM / GRU            → Replace Random Forest with deep learning
-                               time-series model for better sequential
-                               pattern recognition
-
-2  ·  Real-time integration  → Connect to Prometheus or Grafana to pull
-                               live server metrics automatically
-
-3  ·  Kubernetes integration → Feed scaling decisions directly into
-                               Kubernetes Horizontal Pod Autoscaler
-
-4  ·  Type-2 Fuzzy Logic     → Handle uncertainty in membership functions
-                               themselves for greater robustness
-
-5  ·  More fuzzy inputs      → Add memory percentage and network traffic
-                               as additional fuzzy input variables
-
-6  ·  Anomaly detection      → Add Isolation Forest to detect cryptojacking
-                               or DDoS attacks alongside load prediction
-
-7  ·  Multi-server support   → Extend to predict and balance load across
-                               a cluster of servers
+Confidence:
+LOW → 30%
+MED → 51%
+HIGH → 19%
 ```
 
 ---
 
-## Dependencies
+## 💡 Why This Project is Strong
 
-| Library       | Purpose                                  |
-|---------------|------------------------------------------|
-| pandas        | Data loading and preprocessing           |
-| numpy         | Numerical operations                     |
-| matplotlib    | Plotting graphs                          |
-| scikit-learn  | ML models, scaler, evaluation metrics    |
-| scikit-fuzzy  | Fuzzy logic inference system             |
-| scipy         | Required internally by scikit-fuzzy      |
-| joblib        | Saving and loading trained models        |
+✔ Real-world cloud computing problem
+✔ Hybrid AI system (ML + Fuzzy Logic)
+✔ Real-time system integration
+✔ Interactive web dashboard
+✔ Industry-relevant architecture
 
 ---
+
+## ⚠ Limitations
+
+* Future prediction is simulated (not real-time cloud data)
+* Model trained on controlled dataset
+* No actual cloud deployment (yet)
+
+---
+
+## 🚀 Future Enhancements
+
+* Kubernetes auto-scaling integration
+* Real cloud metrics (AWS / Azure / Prometheus)
+* LSTM-based time-series prediction
+* Multi-server load balancing
+* Anomaly detection (DDoS / cryptojacking)
+
+---
+
+## 🛠 Tech Stack
+
+| Layer          | Technology    |
+| -------------- | ------------- |
+| Backend        | Flask         |
+| ML             | Scikit-learn  |
+| Soft Computing | scikit-fuzzy  |
+| Frontend       | HTML, CSS, JS |
+| Charts         | Chart.js      |
+| Monitoring     | psutil        |
+
+---
+
+## 🏁 Final Summary
+
+This project demonstrates a **hybrid intelligent load balancing system** that:
+
+* Predicts server load using ML
+* Makes decisions using fuzzy logic
+* Monitors real system metrics
+* Displays results in a live dashboard
+
+👉 A complete **AI + Soft Computing + Real-Time System project**
+
+---
+
