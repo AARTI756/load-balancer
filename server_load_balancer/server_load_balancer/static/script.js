@@ -1,161 +1,129 @@
-// 🔥 Show loader
-document.querySelector("form")?.addEventListener("submit", () => {
-    document.getElementById("loader").classList.remove("hidden");
-});
-
 window.onload = () => {
 
     const predictionEl = document.querySelector(".prediction");
     if (!predictionEl) return;
 
-    // 🔵 Circle Animation
     const circle = document.querySelector(".circle");
     const progress = document.querySelector(".progress-circle");
 
     if (circle && progress) {
-        const value = circle.getAttribute("data-value");
+        const value = parseFloat(circle.getAttribute("data-value")) || 0;
         const offset = 440 - (440 * value) / 100;
         progress.style.strokeDashoffset = offset;
 
         const prediction = predictionEl.innerText.trim();
 
-        if (prediction === "LOW") {
-            progress.style.stroke = "#22c55e";
-        } else if (prediction === "MEDIUM") {
-            progress.style.stroke = "#f59e0b";
-        } else {
-            progress.style.stroke = "#ef4444";
-        }
+        if (prediction === "LOW") progress.style.stroke = "#22c55e";
+        else if (prediction === "MEDIUM") progress.style.stroke = "#f59e0b";
+        else progress.style.stroke = "#ef4444";
     }
 
-    // 📊 Get Data Safely
     const chartDataEl = document.getElementById("chartData");
-    if (!chartDataEl) return;
+    if (chartDataEl && !window.__chartsLoaded) {
 
-    const probLow = parseFloat(chartDataEl.dataset.low) || 0;
-    const probMed = parseFloat(chartDataEl.dataset.med) || 0;
-    const probHigh = parseFloat(chartDataEl.dataset.high) || 0;
+        window.__chartsLoaded = true;
 
-    const dataValues = [probLow, probMed, probHigh];
+        const low = parseFloat(chartDataEl.dataset.low) || 0;
+        const med = parseFloat(chartDataEl.dataset.med) || 0;
+        const high = parseFloat(chartDataEl.dataset.high) || 0;
 
-    // 📊 Bar Chart (Prediction Confidence)
-    new Chart(document.getElementById("probChart"), {
-        type: "bar",
-        data: {
-            labels: ["LOW", "MEDIUM", "HIGH"],
-            datasets: [{
-                label: "Confidence %",
-                data: dataValues,
-                backgroundColor: ["#22c55e", "#f59e0b", "#ef4444"]
-            }]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    labels: {
-                        color: "#ffffff"
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: {
-                        color: "#ffffff"
-                    },
-                    grid: {
-                        color: "rgba(255,255,255,0.1)"
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: {
-                        color: "#ffffff"
-                    },
-                    grid: {
-                        color: "rgba(255,255,255,0.1)"
-                    }
-                }
+        new Chart(document.getElementById("probChart"), {
+            type: "bar",
+            data: {
+                labels: ["LOW", "MEDIUM", "HIGH"],
+                datasets: [{
+                    label: "Confidence %",
+                    data: [low, med, high],
+                    backgroundColor: ["#22c55e", "#f59e0b", "#ef4444"]
+                }]
             }
-        }
-    });
+        });
 
-    // 📈 CPU Trend (Simulation)
-    const cpuData = Array.from({ length: 10 }, () => Math.floor(Math.random() * 100));
-
-    new Chart(document.getElementById("cpuChart"), {
-        type: "line",
-        data: {
-            labels: ["-10s","-9s","-8s","-7s","-6s","-5s","-4s","-3s","-2s","Now"],
-            datasets: [{
-                label: "CPU %",
-                data: cpuData,
-                borderColor: "#38bdf8",
-                backgroundColor: "rgba(56,189,248,0.2)",
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    labels: {
-                        color: "#ffffff"
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: {
-                        color: "#ffffff"
-                    },
-                    grid: {
-                        color: "rgba(255,255,255,0.1)"
-                    }
-                },
-                y: {
-                    ticks: {
-                        color: "#ffffff"
-                    },
-                    grid: {
-                        color: "rgba(255,255,255,0.1)"
-                    }
-                }
+        new Chart(document.getElementById("cpuChart"), {
+            type: "line",
+            data: {
+                labels: Array.from({ length: 10 }, (_, i) => i),
+                datasets: [{
+                    label: "CPU %",
+                    data: Array.from({ length: 10 }, () => Math.random() * 100),
+                    borderColor: "#38bdf8",
+                    fill: true,
+                    tension: 0.4
+                }]
             }
-        }
-    });
-
-    // 🧾 History Table
-    const table = document.querySelector("#historyTable tbody");
-
-    const cpuInput = document.querySelector("input[name='cpu']")?.value || "-";
-    const loadInput = document.querySelector("input[name='load']")?.value || "-";
-
-    const prediction = predictionEl.innerText.trim();
-    const decision = document.querySelector(".decision-badge")?.innerText || "-";
-
-    if (table) {
-        const row = `
-            <tr>
-                <td>${cpuInput}</td>
-                <td>${loadInput}</td>
-                <td>${prediction}</td>
-                <td>${decision}</td>
-            </tr>
-        `;
-        table.innerHTML += row;
+        });
     }
 
-    // 🧠 Insight
-    const insightBox = document.getElementById("insightBox");
+    // HISTORY SAFE
+    const table = document.querySelector("#historyTable tbody");
+    if (table) {
+        const cpu = document.querySelector("input[name='cpu']")?.value || "-";
+        const load = document.querySelector("input[name='load']")?.value || "-";
+        const pred = predictionEl.innerText.trim();
+        const decision = document.querySelector(".decision-badge")?.innerText || "-";
 
-    if (insightBox) {
-        if (prediction === "HIGH") {
-            insightBox.innerText = "⚠ High load detected → Immediate scaling required!";
-        } else if (prediction === "MEDIUM") {
-            insightBox.innerText = "⚡ Moderate load → Monitor closely.";
-        } else {
-            insightBox.innerText = "✅ System stable.";
+        const lastRow = table.lastElementChild;
+        if (!lastRow || lastRow.children[0].innerText !== cpu) {
+            table.innerHTML += `
+                <tr>
+                    <td>${cpu}</td>
+                    <td>${load}</td>
+                    <td>${pred}</td>
+                    <td>${decision}</td>
+                </tr>
+            `;
         }
+    }
+
+    // INSIGHT
+    const insight = document.getElementById("insightBox");
+    if (insight) {
+        const p = predictionEl.innerText.trim();
+
+        if (p === "HIGH") insight.innerText = "⚠ High load → scale immediately";
+        else if (p === "MEDIUM") insight.innerText = "⚡ Medium load → monitor";
+        else insight.innerText = "✅ Stable system";
+    }
+
+    // TIMELINE SAFE
+    const timelineEl = document.getElementById("timelineData");
+
+    if (timelineEl && !window.__timelineLoaded) {
+        window.__timelineLoaded = true;
+
+        const hours = JSON.parse(timelineEl.dataset.hours || "[]");
+        const preds = JSON.parse(timelineEl.dataset.preds || "[]");
+        const decisions = JSON.parse(timelineEl.dataset.decisions || "[]");
+        const servers = JSON.parse(timelineEl.dataset.servers || "[]");
+        const actions = JSON.parse(timelineEl.dataset.actions || "[]");
+
+        const list = document.getElementById("timeline");
+        if (list) {
+            list.innerHTML = "";
+
+            hours.forEach((h, i) => {
+                setTimeout(() => {
+                    const li = document.createElement("li");
+                    li.innerHTML = `
+                        <b>${h}</b> → ${preds[i]} (${decisions[i]})<br>
+                        ⚙ ${actions[i]} → ${servers[i - 1] || 2} → ${servers[i] || 2}
+                    `;
+                    list.appendChild(li);
+                }, i * 300);
+            });
+        }
+
+        new Chart(document.getElementById("serverChart"), {
+            type: "line",
+            data: {
+                labels: hours,
+                datasets: [{
+                    label: "Servers",
+                    data: servers,
+                    borderColor: "#10b981",
+                    fill: true
+                }]
+            }
+        });
     }
 };
