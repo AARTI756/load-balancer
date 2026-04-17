@@ -112,9 +112,23 @@
     <!-- ⏳ HOUR-WISE FORECAST -->
     <div class="glass-card">
         <h3>⏳ Future Load Prediction (Next 6 Hours)</h3>
-        <canvas id="futureChart"></canvas>
+
+        <div class="chart-box">
+            <canvas id="futureChart"></canvas>
+        </div>
+
+        <div class="future-text">
+            {% for i in range(result.hours|length) %}
+                <p>
+                    {{ result.hours[i] }} → 
+                    {{ result.future_preds[i] }} 
+                    ({{ result.future_decisions[i] }})
+                </p>
+            {% endfor %}
+        </div>
     </div>
 
+    
     <div id="futureData"
         data-hours='{{ result.hours | tojson }}'
         data-preds='{{ result.future_preds | tojson }}'>
@@ -124,6 +138,7 @@
         <h3>🖥️ Server Scaling</h3>
         <canvas id="serverChart"></canvas>
     </div>
+
 
     <!-- 🧾 HISTORY -->
     <div class="glass-card">

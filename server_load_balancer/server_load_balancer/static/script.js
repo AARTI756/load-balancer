@@ -126,4 +126,28 @@ window.onload = () => {
             }
         });
     }
+
+    const futureEl = document.getElementById("futureData");
+
+    if (futureEl) {
+        const hours = JSON.parse(futureEl.dataset.hours || "[]");
+        const preds = JSON.parse(futureEl.dataset.preds || "[]");
+
+        const map = { "LOW": 1, "MEDIUM": 2, "HIGH": 3 };
+        const numeric = preds.map(p => map[p]);
+
+        new Chart(document.getElementById("futureChart"), {
+            type: "line",
+            data: {
+                labels: hours,
+                datasets: [{
+                    label: "Future Load",
+                    data: numeric,
+                    borderColor: "#a78bfa",
+                    fill: true,
+                    tension: 0.4
+                }]
+            }
+        });
+    }    
 };

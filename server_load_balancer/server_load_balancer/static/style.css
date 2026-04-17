@@ -315,3 +315,12 @@ canvas {
 .card:hover {
     transform: scale(1.02);
 }
+
+#futureChart {
+    max-height: 200px;
+    height: 200px !important;
+}
+.chart-box {
+    height: 220px;
+    margin-bottom: 15px;
+}
